@@ -70,14 +70,55 @@ import { Car, cars as cars_list } from './cars';
 
   // @TODO Add an endpoint to GET a list of cars
   // it should be filterable by make with a query paramater
+  app.get("/cars", async ( req: Request, res: Response )=>{
+    const { make } = req.query
 
+    let foundCars =  cars_list.filter( a => a.make == make )
+    if(foundCars.length > 0){
+      res.status(200).send(JSON.stringify(foundCars))
+    }
+    else{
+      res.status(200).send(JSON.stringify(cars_list))
+    }
+  })
   // @TODO Add an endpoint to get a specific car
   // it should require id
   // it should fail gracefully if no matching car is found
-
+  app.get("/cars/:id", async (req: Request, res: Response) => {
+    const { id } = req.params
+    let foundCar =  cars_list.find(a => a.id == id)
+    if(foundCar){
+      res.status(200).send(JSON.stringify(foundCar))
+    }else{
+      res.status(404).send(`car with id ${id} not found`)
+    }
+  })
   /// @TODO Add an endpoint to post a new car to our list
   // it should require id, type, model, and cost
+  app.post("/cars", async (req: Request, res: Response) => {
+    const { id,type,make,model,cost } = req.body
+    let missingFields = []
 
+    if (!id){
+      missingFields.push('id')
+    }
+    if (!type){
+      missingFields.push('type')
+    }
+    if (!model){
+      missingFields.push('model')
+    }
+    if (!cost){
+      missingFields.push('cost')
+    }
+    if ( !id || !type || !model || !cost){
+      res.status(400).send(`Missing fields: ${missingFields.join(', ')}`)
+    }else{
+      cars_list.push({id,type,make,model,cost})
+      res.status(200).send('New Car Added!')
+    }
+
+  })
   // Start the Server
   app.listen( port, () => {
       console.log( `server running http://localhost:${ port }` );
